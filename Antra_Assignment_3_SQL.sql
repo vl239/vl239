@@ -14,7 +14,7 @@ CREATE VIEW view_product_order_Lu AS (
     GROUP BY p.ProductID, p.ProductName
 )
 
--- -- 2. Create a stored procedure “sp_product_order_quantity_[your_last_name]” that accept product id as an input and total quantities of order as output parameter.
+-- 2. Create a stored procedure “sp_product_order_quantity_[your_last_name]” that accept product id as an input and total quantities of order as output parameter.
 -- DROP PROC sp_product_order_quantity_Lu
 CREATE PROC sp_product_order_quantity_Lu
 @id INT,
