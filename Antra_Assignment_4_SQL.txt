@@ -38,6 +38,7 @@ The WHERE clause cannot be used on aggregate data, while the HAVING clause can. 
 6. Difference between RANK() and DenseRank() — value gap
 RANK() assigns the same number for the row which contains the same value and skips the next number. DenseRank() assigns the same number for the row which contains the same value without skipping the next number. 
 
+
 7. COUNT(*) vs. COUNT(colName)
 COUNT(*) counts all the rows in the table, including NULL values. COUNT(colName) counts all the rows in the specified column excluding NULL values.
 
@@ -79,83 +80,82 @@ Union removes all duplicate records, while union all does not. Union sorts the f
 
 
 15. Steps you take to improve SQL Queries
-1) Favor set-based logic over procedural or cursor logic.
-• The most important factor to consider when tuning queries is how to properly  express  logic in a set-based  manner. 
-• Cursors or other procedural constructs limit the query optimizer’s ability  to generate  flexible  query  plans. 
-• Cursors can therefore reduce the possibility of performance improvements  in many situations
+	1) Favor set-based logic over procedural or cursor logic.
+	• The most important factor to consider when tuning queries is how to properly  express  logic in a set-based  manner. 
+	• Cursors or other procedural constructs limit the query optimizer’s ability  to generate  flexible  query  plans. 
+	• Cursors can therefore reduce the possibility of performance improvements  in many situations
 
-2) Test query variations for performance.
-• The query optimizer  can often produce widely different plans for logically equivalent  queries. 
-• Test different techniques, such as joins or subqueries,  to find out which perform better  in various situations.
+	2) Test query variations for performance.
+	• The query optimizer  can often produce widely different plans for logically equivalent  queries. 
+	• Test different techniques, such as joins or subqueries,  to find out which perform better  in various situations.
 
-3) Avoid query hints.
-• You must work with the SQL Server  query optimizer,  rather than against it, to create efficient queries. 
-• Query hints tell the query optimizer how to behave and therefore override the optimizer’s ability to do its job properly. 
-• If you eliminate the optimizer’s choices, you might limit yourself to a query plan that is less than ideal. 
-• Use query  hints only when you are absolutely certain that the  query optimizer  is incorrect.
+	3) Avoid query hints.
+	• You must work with the SQL Server  query optimizer,  rather than against it, to create efficient queries. 
+	• Query hints tell the query optimizer how to behave and therefore override the optimizer’s ability to do its job properly. 
+	• If you eliminate the optimizer’s choices, you might limit yourself to a query plan that is less than ideal. 
+	• Use query  hints only when you are absolutely certain that the  query optimizer  is incorrect.
 
-4) Do not use correlated subqueries to improve performance.
-• Since the query optimizer  is able to integrate subqueries into the main query flow in a variety of ways, subqueries might help in various query tuning situations. 
-• Subqueries can be especially useful in situations in which you create a join to a table only to verify the existence of correlated rows. For better performance,  replace these kinds of joins with correlated subqueries that make use of the  EXISTS operator
+	4) Do not use correlated subqueries to improve performance.
+	• Since the query optimizer  is able to integrate subqueries into the main query flow in a variety of ways, subqueries might help in various query tuning situations. 
+	• Subqueries can be especially useful in situations in which you create a join to a table only to verify the existence of correlated rows. For better performance,  replace these kinds of joins with correlated subqueries that make use of the  EXISTS operator
 
-5) Avoid using a scalar UDF in the WHERE clause.
-Scalar user-defined functions, unlike scalar subqueries, are not optimized into the main query plan. Instead, you must call them row-by-row by using a hidden cursor. This is especially troublesome in the WHERE clause because the function is called for every input row. Using a scalar function in the SELECT  list is much less problematic because the rows have already been filtered in the WHERE clause.
+	5) Avoid using a scalar UDF in the WHERE clause.
+	Scalar user-defined functions, unlike scalar subqueries, are not optimized into the main query plan. Instead, you must call them row-by-row by using a hidden cursor. This is especially troublesome in the WHERE clause because the function is called for every input row. Using a scalar function in the SELECT  list is much less problematic because the rows have already been filtered in the WHERE clause.
 
+	6) Use table-valued UDFs as derived tables.
+	• In contrast to scalar user-defined  functions, table-valued  functions are often helpful from a performance point of view when you use them  as derived  tables. 
+	• The query processor evaluates  a derived table only once per query. 
+	• If you embed  the logic in a table-valued  user-defined  function, you can encapsulate  and reuse it for other queries
 
-6) Use table-valued UDFs as derived tables.
-• In contrast to scalar user-defined  functions, table-valued  functions are often helpful from a performance point of view when you use them  as derived  tables. 
-• The query processor evaluates  a derived table only once per query. 
-• If you embed  the logic in a table-valued  user-defined  function, you can encapsulate  and reuse it for other queries
+	7) Avoid unnecessary GROUP BY columns.
+	Use a subquery instead. 
+	• The process of grouping rows becomes more expensive as you add more columns to the GROUP BY list. 
+	• If your query has few column aggregations but many non-aggregated  grouped columns, you might be able to refactor it by using a correlated scalar subquery. 
+	• This will result in less work for grouping in the query and therefore possibly better overall query performance
 
-7) Avoid unnecessary GROUP BY columns.
-Use a subquery instead. 
-• The process of grouping rows becomes more expensive as you add more columns to the GROUP BY list. 
-• If your query has few column aggregations but many non-aggregated  grouped columns, you might be able to refactor it by using a correlated scalar subquery. 
-• This will result in less work for grouping in the query and therefore possibly better overall query performance
+	8) Use CASE expressions to include variable logic in a query
+	The CASE  expression is one of the  most powerful logic tools available to T-SQL programmers. 
+	• Using CASE, you can dynamically change column output on a row-by-row basis. 
+	• This enables your query to return only the data that is absolutely necessary and therefore reduces the I/O operations  and network overhead  that is required to assemble and send large result sets to clients
 
-8) Use CASE expressions to include variable logic in a query
-The CASE  expression is one of the  most powerful logic tools available to T-SQL programmers. 
-• Using CASE, you can dynamically change column output on a row-by-row basis. 
-• This enables your query to return only the data that is absolutely necessary and therefore reduces the I/O operations  and network overhead  that is required to assemble and send large result sets to clients
+	9) Divide  joins into temporary  tables when you query very large tables.
+	The query optimizer’s main strategy is to find query plans that satisfy queries by using single operations. 
+	• Although this strategy works for most cases, it can fail for larger sets of data because the huge joins require so much I/O overhead. 
+	• In some cases, a better option is to reduce the working set by using temporary tables to materialize key parts of the query.  You can then  join the temporary  tables to produce a final result. 
 
-9) Divide  joins into temporary  tables when you query very large tables.
-The query optimizer’s main strategy is to find query plans that satisfy queries by using single operations. 
-• Although this strategy works for most cases, it can fail for larger sets of data because the huge joins require so much I/O overhead. 
-• In some cases, a better option is to reduce the working set by using temporary tables to materialize key parts of the query.  You can then  join the temporary  tables to produce a final result. 
+	10) Refactoring Cursors into Queries
+	Rebuild logic as multiple  queries
+	• Rebuild logic as a user-defined  function
+	• Rebuild logic as a complex query with a case expression
 
-10) Refactoring Cursors into Queries
-Rebuild logic as multiple  queries
-• Rebuild logic as a user-defined  function
-• Rebuild logic as a complex query with a case expression
-
-FROM DEMO:
---performance tuning
---1. look at the execution plan
---2. choose index wisely
---3. avoid unnecessary joins
---4. avoid SELECT *
---5. JOIN to replace subquery
---6. derived table to avoid a lot of grouping by
+	FROM DEMO:
+	--performance tuning
+	--1. look at the execution plan
+	--2. choose index wisely
+	--3. avoid unnecessary joins
+	--4. avoid SELECT *
+	--5. JOIN to replace subquery
+	--6. derived table to avoid a lot of grouping by
 
 
 16. concurrency problem in transaction
 concurrency occurs when two or more transactions are trying to access the same data or info
-1. dirty reads:
-	t1 allows t2 to read uncommitted data and then t1 rolled back
-	caused by isolation level read uncommitted
-	solved by isolation level read committed
-2. lost update
-	t1 and t2 read and update the same data but t2 finish its work earlier than t1, then t2 will lost their update
-	caused by isolation level read committed
-	solved by isolation level repeatable read
-3. non repeatable read
-	t1 read the same data twice while t2 is updating the data
-	caused by isolation level read committed
-	solved by isolation level repeatable read
-4. phantom read
-	t1 reads the same data twice while t2 is inserting records
-	cuased by isolation level repeatable read
-	solved by isolation level serializable
+	1. dirty reads:
+		t1 allows t2 to read uncommitted data and then t1 rolled back
+		caused by isolation level read uncommitted
+		solved by isolation level read committed
+	2. lost update
+		t1 and t2 read and update the same data but t2 finish its work earlier than t1, then t2 will lost their update
+		caused by isolation level read committed
+		solved by isolation level repeatable read
+	3. non repeatable read
+		t1 read the same data twice while t2 is updating the data
+		caused by isolation level read committed
+		solved by isolation level repeatable read
+	4. phantom read
+		t1 reads the same data twice while t2 is inserting records
+		cuased by isolation level repeatable read
+		solved by isolation level serializable
 
 
 17. what is deadlock, how to prevent
@@ -188,13 +188,9 @@ BCNF - Stricter version of 3NF
 
 19. what are the system defined databases?
 Master: catalog database, keeps info on all user defined databases (.mdf master data file is different from the extension)
-
 Model: whenever you make a database, right click -> properties. You can now change the size. Files -> size(mb), but if you change the model’s properties, the settings change for the next database accordingly. “Alter database” is the command
-
 Msdb: where server agent keeps its activities
-
 Tempdb: keeps temporary tables for usage in the query. Removes all tables after closing SQL
-
 Mssql system resource: Predefined functionalities. Predefined stored procedures are held here. Exampled of a stored procedure stored is Sp_Help which gives you a table of object name, owner, and object type of everything in the database.
 
 
@@ -223,6 +219,7 @@ D: Durability -- once the transaction is completed, then the changes it has made
 
 24. table scan vs. index scan
 Table scan iterates over all table rows. Index scan iterates over all index items, when item index meets search condition, table row is retrieved through index. Usually index scan is less expensive than a table scan because index is more flat than a table.
+
 
 25. Difference between Union and JOIN
 JOIN is used to combine data from many tables based on a matched condition between them. The data combined using JOIN statement results in new columns. UNION is used to combine the result-set of two or more SELECT statements. The data combined using UNION statement results in new distinct rows. 
