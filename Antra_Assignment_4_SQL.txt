@@ -1,0 +1,231 @@
+Virginia Lu, Assignment 4 - SQL Eval Prep
+
+1. What is index; types of indices; pros and cons
+Indexes are database objects based on table columns used to retrieve data faster. They contain pointers to the physical data. More specifically, they are used to quickly find data that satisfy conditions in the WHERE clause, find matching rows in the JOIN clause, maintain uniqueness of the key column during INSERT and UPDATE, and sort, aggregate, and group data.
+
+The types of indexes are clustered and non-clustered, in addition to others outside the scope of our learnings. Clustered index sorts the data rows in the table on their key values, whereas non-clustered index stores the data at one location and indices at another location. Clustered index stores data pages in the leaf nodes of the index, and non-clustered index never stores data pages in the leaf nodes of the index. Clustered index doesn't require additional disk space, but non-clustered index does. Cluster index offers faster data accessing, while non-clustered index is slower. A table can have only one clustered index, and by default primary keys of a table is a clustered index. Foreign keys are commonly used as a non-clustered index. Every non-clustered index contains clustered keys.
+
+The pros of indexes are they reduce disk I/O time, and they allow SQL Server to find data in a table without scanning the entire table.
+The cons of indexes are the additional disk space they take up and the insert, update, and delete statements become slow.
+
+(See https://www.guru99.com/clustered-vs-non-clustered-index.html#4 for more pros/cons of clustered vs. non-clustered.)
+
+
+2. What's the difference between Primary key and Unique constraint?
+Primary key (PK) constraints identify the column that have values that uniquely identify a row in a table. It enforces the entity integrity of the table. Unique constraints enforce the uniqueness of the values in a set of columns. No two rows in the table can have the same value for the columns in a unique constraint. Unique constraints can make sure that no duplicate values are entered in specific columns that do not participate in a PK.
+
+A table can have only one PK constraint, while multiple unique constraints can be defined on a table. A column that participates in the PK cannot accept null values, while only one null value is allowed per column under the unique constraint. PK constraints create clustered indexes, while unique constraints create non-clustered indexes.
+
+PK constraints guarantee unique data and are frequently defined on an identity column. A PK constraint defined on more than one column is called a composite PK. In such a case, values may be duplicated within one column but each combination of values from all columns in the PK constraint definition must be unique.
+
+Additionally, unique constraints can be referenced by a foreign key constraint.
+
+
+3. Tell me about check constraint
+Check constraints enforce domain integrity by limiting the values that are accepted by a column. Similar to foreign key constraints, they control the values that are put in a column. Different from foreign key constraints, check constraints determine the valid values from a logical expression not based on data in another column. 
+
+
+4. Difference between temp table and table variable
+A temp table is a type of table that allows us to store data temporarily. A table variable is a data type that can be used within a Transact-SQL batch, stored procedure, or function, and it is created and defined similarly to a table only with a strictly defined lifetime scope.
+
+Scope wise, temp tables are available only in the current session (local) or for all the sessions or SQL Server connections (global), whereas table variables are available just within the batch, view, or stored procedure. Temp tables are best for large data (>100 rows), while table variables are better for smaller data. Temp tables cannot be used in user defined function (UDF), stored procedures or functions, while table variables can be used in UDF. Temp tables can create index or constraints (except foreign key), but table variables cannot. 
+
+
+5. Difference between WHERE and HAVING
+The WHERE clause cannot be used on aggregate data, while the HAVING clause can. HAVING applies only to groups as a whole, and only filters on aggregation functions, while WHERE applies to individual rows.
+
+
+6. Difference between RANK() and DenseRank() — value gap
+RANK() assigns the same number for the row which contains the same value and skips the next number. DenseRank() assigns the same number for the row which contains the same value without skipping the next number. 
+
+7. COUNT(*) vs. COUNT(colName)
+COUNT(*) counts all the rows in the table, including NULL values. COUNT(colName) counts all the rows in the specified column excluding NULL values.
+
+
+8. What's the difference between left join and inner join? JOIN and Subquery, which one has a better performance, why?
+Left join is used to fetch all the records from the left table but only those records from the right table which satisfy the join condition. For other records in the left table, the right table will return null. Whereas inner join fetches the data from both left and right table which satisfy the join condition. 
+
+JOIN tends to execute faster and have a better performance than a subquery, because joins mitigate the processing burden on the database by replacing multiple queries with one join query. This in turn makes better use of the database's ability to search through, filter, and sort records. Basically any RDBMS creates an execution plan for joins in a better way than subqueries.
+
+
+9. What is correlated subquery
+A correlated subquery (or synchronized subquery) is a subquery (a query nested inside another query) that uses values from the outer query. Because the subquery may be evaluated once for each row processed by the outer query, it can be inefficient.
+
+
+10. What is a CTE, why do we need CTE?
+A CTE (Common Table Expression) allows you to define a temporary named result set that's available temporarily in the execution scope of a statement such as SELECT, INSERT, UPDATE, DELETE, or MERGE. 
+
+We need CTE because whenever we refer the same data or join the same set of records using a sub-query, the code maintainability will be difficult. A CTE makes improved readability and maintenance/manageability of complex SQL statements easier.
+
+
+11. What does SQL Profiler do?
+Creates and manages traces, and analyzes and replays race results.
+
+
+12. What is SQL injection, how to avoid SQL injection?
+SQL Injection (SQLi) is a type of an injection attack that makes it possible to execute malicious SQL statements. These statements control a database server behind a web application. Attackers can use SQL Injection vulnerabilities to bypass application security measures. They can go around authentication and authorization of a web page or web application and retrieve the content of the entire SQL database. They can also use SQL Injection to add, modify, and delete records in the database.
+
+The best way to prevent SQL Injections is to use safe programming functions that make SQL Injections impossible: input validation and parameterized queries (prepared statements) and stored procedures.
+
+
+13. Difference between SP and user defined function? When to use SP when to use function?
+SP is used for DML, while UDF is used for calculations. An SP is called by its name, while a UDF is called in an SQL query. An SP may or may not have output, while a UDF must return some value. An SP can call a UDF, but a UDF cannot call an SP. 
+
+
+14. Criteria of Union and Union all? Difference between UNION and UNION ALL
+Criteria: the number of columns must be the same size, column types must be identical, and an alias must be given in the first SELECT statement. 
+
+Union removes all duplicate records, while union all does not. Union sorts the first column in ascending order, while union all does not. Union cannot be used in recursive CTE, while union all can. 
+
+
+15. Steps you take to improve SQL Queries
+1) Favor set-based logic over procedural or cursor logic.
+• The most important factor to consider when tuning queries is how to properly  express  logic in a set-based  manner. 
+• Cursors or other procedural constructs limit the query optimizer’s ability  to generate  flexible  query  plans. 
+• Cursors can therefore reduce the possibility of performance improvements  in many situations
+
+2) Test query variations for performance.
+• The query optimizer  can often produce widely different plans for logically equivalent  queries. 
+• Test different techniques, such as joins or subqueries,  to find out which perform better  in various situations.
+
+3) Avoid query hints.
+• You must work with the SQL Server  query optimizer,  rather than against it, to create efficient queries. 
+• Query hints tell the query optimizer how to behave and therefore override the optimizer’s ability to do its job properly. 
+• If you eliminate the optimizer’s choices, you might limit yourself to a query plan that is less than ideal. 
+• Use query  hints only when you are absolutely certain that the  query optimizer  is incorrect.
+
+4) Do not use correlated subqueries to improve performance.
+• Since the query optimizer  is able to integrate subqueries into the main query flow in a variety of ways, subqueries might help in various query tuning situations. 
+• Subqueries can be especially useful in situations in which you create a join to a table only to verify the existence of correlated rows. For better performance,  replace these kinds of joins with correlated subqueries that make use of the  EXISTS operator
+
+5) Avoid using a scalar UDF in the WHERE clause.
+Scalar user-defined functions, unlike scalar subqueries, are not optimized into the main query plan. Instead, you must call them row-by-row by using a hidden cursor. This is especially troublesome in the WHERE clause because the function is called for every input row. Using a scalar function in the SELECT  list is much less problematic because the rows have already been filtered in the WHERE clause.
+
+
+6) Use table-valued UDFs as derived tables.
+• In contrast to scalar user-defined  functions, table-valued  functions are often helpful from a performance point of view when you use them  as derived  tables. 
+• The query processor evaluates  a derived table only once per query. 
+• If you embed  the logic in a table-valued  user-defined  function, you can encapsulate  and reuse it for other queries
+
+7) Avoid unnecessary GROUP BY columns.
+Use a subquery instead. 
+• The process of grouping rows becomes more expensive as you add more columns to the GROUP BY list. 
+• If your query has few column aggregations but many non-aggregated  grouped columns, you might be able to refactor it by using a correlated scalar subquery. 
+• This will result in less work for grouping in the query and therefore possibly better overall query performance
+
+8) Use CASE expressions to include variable logic in a query
+The CASE  expression is one of the  most powerful logic tools available to T-SQL programmers. 
+• Using CASE, you can dynamically change column output on a row-by-row basis. 
+• This enables your query to return only the data that is absolutely necessary and therefore reduces the I/O operations  and network overhead  that is required to assemble and send large result sets to clients
+
+9) Divide  joins into temporary  tables when you query very large tables.
+The query optimizer’s main strategy is to find query plans that satisfy queries by using single operations. 
+• Although this strategy works for most cases, it can fail for larger sets of data because the huge joins require so much I/O overhead. 
+• In some cases, a better option is to reduce the working set by using temporary tables to materialize key parts of the query.  You can then  join the temporary  tables to produce a final result. 
+
+10) Refactoring Cursors into Queries
+Rebuild logic as multiple  queries
+• Rebuild logic as a user-defined  function
+• Rebuild logic as a complex query with a case expression
+
+FROM DEMO:
+--performance tuning
+--1. look at the execution plan
+--2. choose index wisely
+--3. avoid unnecessary joins
+--4. avoid SELECT *
+--5. JOIN to replace subquery
+--6. derived table to avoid a lot of grouping by
+
+
+16. concurrency problem in transaction
+concurrency occurs when two or more transactions are trying to access the same data or info
+1. dirty reads:
+	t1 allows t2 to read uncommitted data and then t1 rolled back
+	caused by isolation level read uncommitted
+	solved by isolation level read committed
+2. lost update
+	t1 and t2 read and update the same data but t2 finish its work earlier than t1, then t2 will lost their update
+	caused by isolation level read committed
+	solved by isolation level repeatable read
+3. non repeatable read
+	t1 read the same data twice while t2 is updating the data
+	caused by isolation level read committed
+	solved by isolation level repeatable read
+4. phantom read
+	t1 reads the same data twice while t2 is inserting records
+	cuased by isolation level repeatable read
+	solved by isolation level serializable
+
+
+17. what is deadlock, how to prevent
+A deadlock occurs when 2 processes are competing for exclusive access to a resource but is unable to obtain exclusive access to it because the other process is preventing it. This results in a standoff where neither process can proceed. The only way out of a deadlock is for one of the processes to be terminated. SQL Server automatically detects when deadlocks have occurred and takes action by killing one of the processes known as the victim.
+
+Some ways to minimize deadlocks:
+- Always try to hold locks for as short a period as possible.
+- Always access resources in the same order
+- Ensure that you don’t have to wait on user input in the middle of a transaction. First, get all the information you need and then submit the transaction
+- Try to limit lock escalation, by using hints such as ROWLOCK etc
+- Use READ COMMITTED SNAPSHOT ISOLATION or SNAPSHOT ISOLATION
+
+Useful ways to avoid and minimize SQL Server deadlocks:
+- Try to keep transactions short; this will avoid holding locks in a transaction for a long period of time.
+- Access objects in a similar logical manner in multiple transactions.
+- Create a covering index to reduce the possibility of a deadlock.
+- Create indexes to match the foreign key columns. This way, you can eliminate deadlocks due to cascading referential integrity.
+- Set deadlock priorities using the SET DEADLOCK_PRIORITY session variable. If you set the deadlock priority, SQL Server kills the session with the lowest deadlock priority.
+- Utilize the error handling using the try-catch blocks. You can trap the deadlock error and rerun the transaction in the event of a deadlock victim.
+- Change the isolation level to the READ COMMITTED SNAPSHOT ISOLATION or SNAPSHOT ISOLATION. This changes the SQL Server locking mechanism. Although, you should be careful in changing the isolation level, as it might impact other queries negatively.
+
+
+18. what is normalization, 1NF - BCNF, benefits using normalization
+Database Normalization is a process of organizing data to minimize redundancy (data duplication). The benefits are that it saves disk space and ensures data consistency. Normalization has a series of steps called “Forms”, the more steps you take the more normalized your tables are. 
+1NF - atomic values; one cell, one value; no repeating groups
+2NF - 1NF + No partial dependency
+3NF - 2NF + No transitive dependency
+BCNF - Stricter version of 3NF
+
+
+19. what are the system defined databases?
+Master: catalog database, keeps info on all user defined databases (.mdf master data file is different from the extension)
+
+Model: whenever you make a database, right click -> properties. You can now change the size. Files -> size(mb), but if you change the model’s properties, the settings change for the next database accordingly. “Alter database” is the command
+
+Msdb: where server agent keeps its activities
+
+Tempdb: keeps temporary tables for usage in the query. Removes all tables after closing SQL
+
+Mssql system resource: Predefined functionalities. Predefined stored procedures are held here. Exampled of a stored procedure stored is Sp_Help which gives you a table of object name, owner, and object type of everything in the database.
+
+
+20. composite key
+• A composite key, in the context  of relational  databases,  is a combination  of two or more columns in a table  that can be used  to uniquely  identify  each row in the  table.  Uniqueness  is only guaranteed  when  the columns are combined;  when  taken individually  the columns do not guarantee uniqueness.
+• This is usually  seen  in Joint tables.
+
+
+21. candidate key
+• A key that is not a PK but  eligible  to be a PK.
+• Mostly it is a unique  key without  null  value.
+
+
+22. DDL vs. DML
+Data definition language (DDL): Allows creation objects in database with: Create, Alter, Drop
+Data Manipulation Language (DML): Allows query and modify the data: Select, Insert, Update, Delete.
+
+
+23. ACID property
+A property of transactions:
+A: Atomicity -- work is atomic
+C: Consistency -- whatever happends in the middle of the transaction, this property will never leave your db in half-completed state
+I: Isolation -- two transactions will be isolated from each other by locking the resource
+D: Durability -- once the transaction is completed, then the changes it has made to the db will be permanent
+
+
+24. table scan vs. index scan
+Table scan iterates over all table rows. Index scan iterates over all index items, when item index meets search condition, table row is retrieved through index. Usually index scan is less expensive than a table scan because index is more flat than a table.
+
+25. Difference between Union and JOIN
+JOIN is used to combine data from many tables based on a matched condition between them. The data combined using JOIN statement results in new columns. UNION is used to combine the result-set of two or more SELECT statements. The data combined using UNION statement results in new distinct rows. 
+For JOIN, the number of columns selected from each table may not be the same, while it should be for UNION. For JOIN, datatypes of corresponding columns selected from each table can be different, while they should be the same for UNION.
+
+
